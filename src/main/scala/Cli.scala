@@ -61,7 +61,7 @@ object Cli extends ZIOCliDefault {
 
   val resetStateHelp: HelpDoc = HelpDoc.p("Reset copy state to false for all documents")
   val resetState =
-    Command("reset-state", Options.none, Args.none).withHelp(reportHelp).map { case _ =>
+    Command("reset-state", Options.none, Args.none).withHelp(resetStateHelp).map { case _ =>
       Subcommand.ResetState()
     }
 

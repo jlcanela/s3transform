@@ -19,10 +19,10 @@ COMMANDS
 
   - setup <dynamodbTable>                                     Creates the dynamodb table if it does not exist
   - sample <dynamodbTable> <bucket> <integer>                 Generates sample data into the bucket
-  - scan <bucket> <table>                                     Scan S3 Folder and store results in dynamodb table
-  - report <table> <output>                                   Report transformation and exports results to S3 output
+  - scan <bucket> <dynamodbTable>                             Scan S3 Folder and store results in dynamodb table
+  - report <dynamodbTable> <output>                           Report transformation and exports results to S3 output
   - transform [(-i, --incremental)] <dynamodbTable> <output>  Transform files and copy them to S3 output bucket
-  - reset-state                                               Report transformation and exports results to S3 ou
+  - reset-state                                               Reset copy state to false for all documents
 ```
 
 # Local test with localstack
