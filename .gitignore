@@ -1,0 +1,9 @@
+.bloop
+.bsp
+.history
+.localstack
+.metals
+.vscode
+project/metals.sbt
+project/project
+target
