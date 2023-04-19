@@ -18,9 +18,11 @@ import software.amazon.awssdk.services.s3.model.S3Exception
 
 trait S3Repository:
 
+  def createBucket(bucket: String): ZIO[Any, Throwable, Unit]
+
   def allDocuments(bucket: String): ZStream[Any, Throwable, S3Document]
 
-  def copy(outputBucket: String): ZIO[Any, Throwable, Unit]
+  def copy(bucketIn: String, keyIn: String, bucketOut: String, keyOut: String): ZIO[Any, Throwable, Unit]
 
   def sample(bucket: String, count: Int): ZIO[Any, Throwable, Unit]
 
@@ -46,4 +48,13 @@ case class S3RepositoryLive(s3: S3) extends S3Repository:
   def sample(bucket: String, count: Int) = 
     ZIO.foreach(1 to count)(i => writeSample(bucket, i)).unit
 
-  def copy(outputBucket: String): ZIO[Any, Throwable, Unit] = Console.printLine("copying remaining files")
+  def copy(bucketIn: String, keyIn: String, bucketOut: String, keyOut: String): ZIO[Any, Throwable, Unit] = for {
+    metadata <- s3.getObjectMetadata(bucketIn, keyIn)
+    stream = s3.getObject(bucketIn, keyIn)
+    _ <- s3.putObject(bucketOut, keyOut, metadata.contentLength, stream) 
+  } yield ()
+
+  def createBucket(bucket: String) = for {
+    exists <- s3.isBucketExists(bucket)
+    _ <- if (exists) ZIO.unit else s3.createBucket(bucket)
+  } yield ()

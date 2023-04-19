@@ -3,11 +3,12 @@ package repositories
 import zio._
 import zio.stream._
 import zio.dynamodb.DynamoDBExecutor
-import zio.dynamodb.DynamoDBQuery.{ createTable, describeTable, put, queryAll, scanAll, scanAllItem }
+import zio.dynamodb.DynamoDBQuery.{ createTable, describeTable, put, queryAll, scanAll, scanAllItem, update }
 import zio.dynamodb._
 import zio.Exit.Success
 import zio.Exit.Failure
 import model.S3Document
+import java.time.Instant
 
 trait DynamoRepository:
 
@@ -17,7 +18,11 @@ trait DynamoRepository:
 
     def report: ZIO[Any, Throwable, Unit]
 
-    def allS3Documents: ZIO[Any, Throwable, ZStream[Any, Throwable, S3Document]]
+    def allS3Documents(incremental: Boolean): ZIO[Any, Throwable, ZStream[Any, Throwable, S3Document]]
+
+    def markCopied(key: String): ZIO[Any, Throwable, Unit]
+
+    def resetState: ZIO[Any, Throwable, Unit]
 
 object DynamoRepository:
 
@@ -61,7 +66,7 @@ case class DynamoRepositoryLive(dynamodbExecutor: DynamoDBExecutor, dynamodbTabl
         DynamoRepository.Report(report.items + 1, report.processedItems + doc.processed.map(_ => 1).getOrElse(0))
     }
 
-    def allS3Documents = 
+    def allS3Documents(incremental: Boolean) = 
         implicit val sch = S3Document.schema
         (for {
             stream <- scanAllItem(dynamodbTable, S3Document.key, S3Document.creationDate, S3Document.processed).execute.provideEnvironment(ZEnvironment(dynamodbExecutor))
@@ -71,7 +76,19 @@ case class DynamoRepositoryLive(dynamodbExecutor: DynamoDBExecutor, dynamodbTabl
 
     def report =
         (for {
-        stream <- allS3Documents
+        stream <- allS3Documents(false)
         report <- stream.run(computeReport)
         _ <- Console.printLine(report)
     } yield ()).provideEnvironment(ZEnvironment(dynamodbExecutor))
+
+    def markCopied(key: String) = (for {
+        updated <- update(dynamodbTable, S3Document.primaryKey(key))(S3Document.processed.set(Some(Instant.now))).execute
+    } yield ()).provideEnvironment(ZEnvironment(dynamodbExecutor))//.unOption.provideEnvironment(ZEnvironment(dynamodbExecutor))
+
+    def resetState = (for {
+        stream <- allS3Documents(true)
+        _ <- batchWriteFromStream(stream) { s3Document => 
+            update(dynamodbTable, S3Document.primaryKey(s3Document.key))(S3Document.processed.set(None))
+        }.runDrain
+    } yield ()).provideEnvironment(ZEnvironment(dynamodbExecutor))
+    
