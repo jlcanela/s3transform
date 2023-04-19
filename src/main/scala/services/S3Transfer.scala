@@ -38,7 +38,6 @@ case class S3TransferLive(s3: S3Repository, dynamo: DynamoRepository) extends S3
     def copy(outputBucket: String) = for {
         stream <- dynamo.allS3Documents.tap(doc => Console.printLine(doc.toString))
         _ <- stream.runDrain
-        //_ <- stream.drain
     } yield stream.drain
     def sample(bucket: String, count: Int) = s3.sample(bucket, count)
 

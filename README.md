@@ -25,8 +25,9 @@ COMMANDS
   - transform <dynamodbTable> <output>         Report transformation and exports results to S3 output
 ```
 
-# Local test with localstack
+# Local test with localstack
 
+Start localstack & test manually: 
 ```
 docker-compose up -d
 
