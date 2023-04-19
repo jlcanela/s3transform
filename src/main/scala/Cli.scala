@@ -41,13 +41,13 @@ object Cli extends ZIOCliDefault {
 
   val scanHelp: HelpDoc = HelpDoc.p("Scan S3 Folder and store results in dynamodb table")
   val scan =
-    Command("scan", Options.none, Args.text("bucket") ++ Args.text("table")).withHelp(scanHelp).map { case (bucket, table) =>
-      Subcommand.Scan(bucket.toString, table.toString)
+    Command("scan", Options.none, Args.text("bucket") ++ Args.text("dynamodbTable")).withHelp(scanHelp).map { case (bucket, dynamodbTable) =>
+      Subcommand.Scan(bucket.toString, dynamodbTable.toString)
     }
 
   val reportHelp: HelpDoc = HelpDoc.p("Report transformation and exports results to S3 output")
   val report =
-    Command("report", Options.none, Args.text("table") ++ Args.text("output")).withHelp(reportHelp).map { case (dynamodbTable, output) =>
+    Command("report", Options.none, Args.text("dynamodbTable") ++ Args.text("output")).withHelp(reportHelp).map { case (dynamodbTable, output) =>
       Subcommand.Report(dynamodbTable, output)
     }
 

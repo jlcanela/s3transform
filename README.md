@@ -1,7 +1,6 @@
 # Usage
 
 ```
-
    __________   ______                      ____                   
   / ___/__  /  /_  __/________ _____  _____/ __/___  _________ ___ 
   \__ \ /_ <    / / / ___/ __ `/ __ \/ ___/ /_/ __ \/ ___/ __ `__ \
@@ -18,11 +17,12 @@ USAGE
 
 COMMANDS
 
-  - setup <dynamodbTable>                      Creates the dynamodb table if it does not exist
-  - sample <dynamodbTable> <bucket> <integer>  Generates sample data into the bucket
-  - scan <bucket> <table>                      Scan S3 Folder and store results in dynamodb table
-  - report <table> <output>                    Report transformation and exports results to S3 output
-  - transform <dynamodbTable> <output>         Report transformation and exports results to S3 output
+  - setup <dynamodbTable>                                     Creates the dynamodb table if it does not exist
+  - sample <dynamodbTable> <bucket> <integer>                 Generates sample data into the bucket
+  - scan <bucket> <table>                                     Scan S3 Folder and store results in dynamodb table
+  - report <table> <output>                                   Report transformation and exports results to S3 output
+  - transform [(-i, --incremental)] <dynamodbTable> <output>  Transform files and copy them to S3 output bucket
+  - reset-state                                               Report transformation and exports results to S3 ou
 ```
 
 # Local test with localstack
